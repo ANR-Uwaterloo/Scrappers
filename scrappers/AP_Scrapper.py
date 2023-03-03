@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import csv
 import pandas as pd
 import re
+import Article
 
 def scrap_ap_news():
     httpurls = []
@@ -17,7 +18,7 @@ def scrap_ap_news():
         httpurls.append("https://apnews.com" + i)
 
     mycsv = open('Final_AP_News.csv', 'a',encoding = 'utf-8')
-    fieldnames = ['category','headline','author', 'link' , 'description', 'publish_date', 'img_url' ]
+    fieldnames = ['category','headline','author', 'link' , 'description', 'publish_date', 'img_url']
     writer = csv.DictWriter(mycsv,fieldnames=fieldnames)
 
     frame=[]
@@ -95,8 +96,16 @@ def scrap_ap_news():
             else:
                 print("No image found for {}".format(url))
 
-        frame.append((Category,Headline,Author,url,Content,format_date, image_url))
-        writer.writerow({'category':Category,'headline': Headline ,'author': Author,'link': url, 'description': Content,'publish_date': format_date, 'img_url': image_url})
+        article = Article()
+        article.category = Category
+        article.headline = Headline
+        article.authors = Author
+        article.link = url
+        article.description = Content
+        article.publish_date = format_date
+        article.img_url = image_url
+        # frame.append((Category,Headline,Author,url,Content,format_date, image_url))
+        writer.writerow(article.get_dict())
         c=c+1
     mycsv.close()
 

@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import csv
 import pandas as pd
 import re
+import Article
 
 def scrap_upi():
     httpurls = []
@@ -62,7 +63,16 @@ def scrap_upi():
         date2= date1.replace('\t', '')
         date2= date2.split('/')[0].strip()
         frame.append((Category,Headline,Author,url,Content,date2, image_url))
-        writer.writerow({'category':Category,'headline': Headline ,'author': Author,'link': url, 'description': Content,'publish_date': date2, 'img_url': image_url})
+
+        article = Article()
+        article.category = Category
+        article.headline = Headline
+        article.authors = Author
+        article.link = url
+        article.description = Content
+        article.publish_date = date2
+        article.img_url = image_url
+        writer.writerow(article.get_dict())
         c=c+1
     mycsv.close()
 
