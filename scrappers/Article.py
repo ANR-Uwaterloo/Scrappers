@@ -1,4 +1,4 @@
-class Article(object):
+class Article:
     """
     Class representing a single news article containing all the information that news-please can extract.
     """
@@ -7,7 +7,7 @@ class Article(object):
     description = None
     img_url = None
     link = None
-    category = None
+    category = "N/A"
     headline = None
 
     def get_dict(self):
