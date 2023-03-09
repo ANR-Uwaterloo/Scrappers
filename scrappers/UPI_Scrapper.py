@@ -1,11 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
-import csv
-import pandas as pd
-import re
 import Article
+import db.db_accumulator as db_conx
+
 
 def scrap_upi():
+    d_base = db_conx.db_connection()
     httpurls = []
     upilink="https://www.upi.com/Top_News/2023/p{}"
     for page in range(1, 15):
@@ -15,10 +15,6 @@ def scrap_upi():
         project_href = [i['href'] for i in soapTest.find_all('a', href=True, class_='row')]
         for i in project_href:
             httpurls.append(i)
-
-    mycsv = open('Final_Upi4_new.csv', 'a',encoding = 'utf-8')
-    fieldnames = ['category','headline','author', 'link' , 'description', 'publish_date', 'img_url' ]
-    writer = csv.DictWriter(mycsv,fieldnames=fieldnames)
 
     frame=[]
 
@@ -64,7 +60,7 @@ def scrap_upi():
         date2= date2.split('/')[0].strip()
         frame.append((Category,Headline,Author,url,Content,date2, image_url))
 
-        article = Article()
+        article = Article.Article()
         article.category = Category
         article.headline = Headline
         article.authors = Author
@@ -72,12 +68,18 @@ def scrap_upi():
         article.description = Content
         article.publish_date = date2
         article.img_url = image_url
-        writer.writerow(article.get_dict())
-        c=c+1
-    mycsv.close()
 
-#data=pd.DataFrame(upperframe, columns=['Headline','Link','Date','Content','Author'])
-#data = pd.DataFrame(frame, columns=['category','headline','author','link','description','date', 'img_url'])
+        # write to mysql
+        cur = d_base.cursor()
+        cur.execute("INSERT INTO article (headline, category, author, description, link, imageurl, publishDate) \
+                                            VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                    (article.headline, article.category, article.authors[0],
+                     article.description, article.link, article.img_url, article.publish_date))
+
+        c = c + 1
+
+    d_base.commit()
+    d_base.close()
 
 if __name__ == "__main__":
     scrap_upi()
